@@ -9,7 +9,7 @@ services:
     expose:
       - 3000/tcp
     ports:
-      - "3001:3000"  # ✅ TEMPORARY - for direct testing
+      - "3002:3000"  # ✅ TEMPORARY - for direct testing
     environment:
       - PORT=${PORT}
       - FLOWISE_USERNAME=${FLOWISE_USERNAME}
