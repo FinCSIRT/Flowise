@@ -17,12 +17,12 @@ services:
         container_name: flowise-main
         restart: always
         ports:
-            - '${PORT:-3000}:${PORT:-3000}'
+            - '${PORT:-3002}:${PORT:-3002}'
         volumes:
             - ~/.flowise:/root/.flowise
         environment:
             # --- Essential Flowise Vars ---
-            - PORT=${PORT:-3000}
+            - PORT=${PORT:-3002}
             - DATABASE_PATH=${DATABASE_PATH:-/root/.flowise}
             - DATABASE_TYPE=${DATABASE_TYPE}
             - DATABASE_PORT=${DATABASE_PORT}
@@ -149,7 +149,7 @@ services:
             - HTTP_DENY_LIST=${HTTP_DENY_LIST}
             - TRUST_PROXY=${TRUST_PROXY}
         healthcheck:
-            test: ['CMD', 'curl', '-f', 'http://localhost:${PORT:-3000}/api/v1/ping']
+            test: ['CMD', 'curl', '-f', 'http://localhost:${PORT:-3002}/api/v1/ping']
             interval: 10s
             timeout: 5s
             retries: 5
