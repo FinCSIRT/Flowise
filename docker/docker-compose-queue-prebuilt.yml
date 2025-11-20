@@ -16,8 +16,14 @@ services:
         image: flowiseai/flowise:latest
         container_name: flowise-main
         restart: always
-        ports:
-            - '${PORT:-3002}:${PORT:-3002}'
+        expose:
+            - '3002/tcp'
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.flowise.rule=Host(`flowise.fincident.org`)"
+            - "traefik.http.routers.flowise.entrypoints=websecure"
+            - "traefik.http.routers.flowise.tls.certresolver=letsencrypt"
+            - "traefik.http.services.flowise.loadbalancer.server.port=3002"
         volumes:
             - ~/.flowise:/root/.flowise
         environment:
