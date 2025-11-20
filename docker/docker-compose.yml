@@ -133,8 +133,12 @@ services:
             - CUSTOM_MCP_PROTOCOL=${CUSTOM_MCP_PROTOCOL}
             - HTTP_DENY_LIST=${HTTP_DENY_LIST}
             - TRUST_PROXY=${TRUST_PROXY}
-        ports:
-            - '${PORT}:${PORT}'
+        labels:
+              - "traefik.enable=true"
+              - "traefik.http.routers.flowise.rule=Host(`flowise.fincident.org`)"
+              - "traefik.http.routers.flowise.entrypoints=websecure"
+              - "traefik.http.routers.flowise.tls.certresolver=letsencrypt"
+              - "traefik.http.services.flowise.loadbalancer.server.port=3000"
         healthcheck:
             test: ['CMD', 'curl', '-f', 'http://localhost:${PORT}/api/v1/ping']
             interval: 10s
