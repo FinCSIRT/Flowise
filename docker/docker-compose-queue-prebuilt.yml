@@ -17,12 +17,12 @@ services:
     container_name: flowise-main
     restart: unless-stopped  # Changed: More standard than "always"
     networks:
-      - dokploy-network  # Changed: Use dokploy-network
+            - dokploy-network  # Changed: Use dokploy-network
     expose:
-      - '3002/tcp'  # Added: Required for Traefik discovery
+            - '3002/tcp'  # Added: Required for Traefik discovery
     # Removed: ports - using Traefik instead of direct port mapping
     volumes:
-      - flowise-data:/root/.flowise  # Changed: Named volume for persistence
+            - flowise-data:/root/.flowise  # Changed: Named volume for persistence
         environment:
             # --- Essential Flowise Vars ---
             - PORT=${PORT:-3002}
