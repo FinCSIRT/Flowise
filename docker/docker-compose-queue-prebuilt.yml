@@ -306,12 +306,6 @@ services:
         depends_on:
             - redis
             - flowise
-        labels:  # ✅ ADD TRAEFIK LABELS
-              - "traefik.enable=true"
-              - "traefik.http.routers.flowise.rule=Host(`flowise.fincident.org`)"
-              - "traefik.http.routers.flowise.entrypoints=websecure"
-              - "traefik.http.routers.flowise.tls.certresolver=letsencrypt"
-              - "traefik.http.services.flowise.loadbalancer.server.port=3002"
         networks:
             - flowise-net
 
