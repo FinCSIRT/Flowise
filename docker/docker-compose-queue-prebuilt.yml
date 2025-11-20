@@ -1,25 +1,28 @@
-version: '3.1'
+version: '3.8'  # Changed: Updated for better Docker compatibility
 
 services:
-    redis:
-        image: redis:alpine
-        container_name: flowise-redis
-        ports:
-            - '6379:6379'
-        volumes:
-            - redis_data:/data
-        networks:
-            - flowise-net
-        restart: always
+  redis:
+    image: redis:alpine
+    container_name: flowise-redis
+    ports:
+      - '6379:6379'  # Kept: Redis needs external access for monitoring
+    volumes:
+      - redis_data:/data
+    networks:
+      - dokploy-network  # Changed: Use dokploy-network instead of flowise-net
+    restart: unless-stopped  # Changed: More standard than "always"
 
-    flowise:
-        image: flowiseai/flowise:latest
-        container_name: flowise-main
-        restart: always
-        ports:
-            - '${PORT:-3000}:${PORT:-3000}'
-        volumes:
-            - ~/.flowise:/root/.flowise
+  flowise:
+    image: flowiseai/flowise:latest
+    container_name: flowise-main
+    restart: unless-stopped  # Changed: More standard than "always"
+    networks:
+      - dokploy-network  # Changed: Use dokploy-network
+    expose:
+      - '3000/tcp'  # Added: Required for Traefik discovery
+    # Removed: ports - using Traefik instead of direct port mapping
+    volumes:
+      - flowise-data:/root/.flowise  # Changed: Named volume for persistence
         environment:
             # --- Essential Flowise Vars ---
             - PORT=${PORT:-3000}
@@ -148,6 +151,13 @@ services:
             - CUSTOM_MCP_PROTOCOL=${CUSTOM_MCP_PROTOCOL}
             - HTTP_DENY_LIST=${HTTP_DENY_LIST}
             - TRUST_PROXY=${TRUST_PROXY}
+        
+        labels:  # Added: Traefik configuration for Dokploy
+              - "traefik.enable=true"
+              - "traefik.http.routers.flowise.rule=Host(`flowise.fincident.org`)"
+              - "traefik.http.routers.flowise.entrypoints=websecure"
+              - "traefik.http.routers.flowise.tls.certresolver=letsencrypt"
+              - "traefik.http.services.flowise.loadbalancer.server.port=3000"
         healthcheck:
             test: ['CMD', 'curl', '-f', 'http://localhost:${PORT:-3000}/api/v1/ping']
             interval: 10s
@@ -157,15 +167,15 @@ services:
         entrypoint: /bin/sh -c "sleep 3; flowise start"
         depends_on:
             - redis
-        networks:
-            - flowise-net
 
-    flowise-worker:
+  flowise-worker:
         image: flowiseai/flowise-worker:latest
         container_name: flowise-worker
-        restart: always
+        restart: unless-stopped  # Changed: More standard than "always"
+        networks:
+            - dokploy-network  # Changed: Use dokploy-network instead of flowise-net
         volumes:
-            - ~/.flowise:/root/.flowise
+            - flowise-data:/root/.flowise  # Changed: Use same named volume as main instance
         environment:
             # --- Essential Flowise Vars ---
             - WORKER_PORT=${WORKER_PORT:-5566}
@@ -304,13 +314,14 @@ services:
         depends_on:
             - redis
             - flowise
-        networks:
-            - flowise-net
 
 volumes:
-    redis_data:
+      redis_data:
+        driver: local
+      flowise-data:  # Added: Named volume for Flowise data (shared by main and worker)
         driver: local
 
 networks:
-    flowise-net:
-        driver: bridge
+      dokploy-network:  # Changed: Use external dokploy network
+        external: true
+        name: dokploy-network
