@@ -4,7 +4,6 @@ services:
   flowise:
     image: flowiseai/flowise:latest
     restart: unless-stopped
-    container_name: flowise
     networks:
       - dokploy-network
     expose:
