@@ -8,8 +8,6 @@ services:
       - dokploy-network
     expose:
       - 3000/tcp
-    ports:
-      - "3002:3000"  # ✅ TEMPORARY - for direct testing
     environment:
       - PORT=${PORT}
       - FLOWISE_USERNAME=${FLOWISE_USERNAME}
