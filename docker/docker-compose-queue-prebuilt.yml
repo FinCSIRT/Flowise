@@ -1,48 +1,18 @@
 version: '3.8'
 
 services:
-  redis:
-    image: redis:alpine
-    container_name: flowise-redis
-    ports:
-      - '6379:6379'
-    volumes:
-      - redis_data:/data
-    networks:
-      - dokploy-network
-    restart: unless-stopped
-    command: redis-server --appendonly yes  # Added: Enable persistence
-
   flowise:
     image: flowiseai/flowise:latest
-    container_name: flowise-main
+    container_name: flowise-simple
     restart: unless-stopped
     networks:
       - dokploy-network
     expose:
       - '3002/tcp'
-    volumes:
-      - flowise-data:/root/.flowise
     environment:
-      # --- Essential Flowise Vars ---
       - PORT=3002
       - FLOWISE_USERNAME=admin
       - FLOWISE_PASSWORD=4B5KJLNymLuYmNLhtdJE6ps8s1db8UMmsP
-      - APP_URL=https://flowise.fincident.org
-      - CORS_ORIGINS=https://flowise.fincident.org
-      - TRUST_PROXY=true
-      
-      # Database - FIXED: Use absolute paths
-      - DATABASE_PATH=/root/.flowise
-      - LOG_PATH=/root/.flowise/logs
-      - SECRETKEY_PATH=/root/.flowise
-      - BLOB_STORAGE_PATH=/root/.flowise/storage
-      
-      # Queue Configuration - FIXED: Use container name
-      - MODE=main  # Changed: Start with main mode first
-      - REDIS_URL=redis://flowise-redis:6379  # FIXED: Use container name
-      
-      # Remove other complex configurations for now
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.flowise.rule=Host(`flowise.fincident.org`)"
@@ -55,17 +25,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    entrypoint: /bin/sh -c "sleep 10; flowise start"  # Increased sleep
-    depends_on:
-      - redis
-
-# REMOVED: flowise-worker for now - get main working first
-
-volumes:
-  redis_data:
-    driver: local
-  flowise-data:
-    driver: local
+    entrypoint: /bin/sh -c "sleep 10; flowise start"
 
 networks:
   dokploy-network:
