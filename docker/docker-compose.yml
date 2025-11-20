@@ -59,11 +59,11 @@ services:
       - "traefik.http.services.flowise.loadbalancer.server.port=3000"
     
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/v1/flowise/version']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+        test: ['CMD', 'curl', '-f', 'http://localhost:${PORT}/api/v1/ping']
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 30s
     
     volumes:
       - flowise-data:/root/.flowise  # CHANGED FROM BIND MOUNT
